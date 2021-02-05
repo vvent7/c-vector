@@ -1,5 +1,5 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef CVECTOR_H
+#define CVECTOR_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -10,8 +10,9 @@ typedef struct VectorHeader{
   size_t size, capacity;
 } VectorHeader;
 
+//Verifying whether there's a MIN definition
 #ifndef MIN
-  #define MIN(x, y) (x<y ? x : y)
+  #define MIN(x, y) (x<y ? x : y) //Returns the minimum number (x or y).
 #endif
 
 //Defines Vector's type (int, double, float, boolean, etc...);
@@ -73,6 +74,7 @@ Vector(void) vector_create();
     free(vector_header(vec)); free(vec); \
   }while(0)
 
+//Inserts data inside vector at specifix index
 #define vector_insert(vec, index, data)                                    \
   do{                                                                      \
     VectorHeader *vh = vector_header(vec);                                 \
@@ -88,6 +90,7 @@ Vector(void) vector_create();
     }                                                                      \
   }while(0)
 
+//Inserts data at Vector's end
 #define vector_push_back(vec, data) vector_insert(vec, vector_size(vec), data)
 
 #endif

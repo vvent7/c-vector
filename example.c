@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "vector.h"
+#include "cvector.h"
 
 void print_dimensions(Vector(int) vec){
   VectorHeader *vh = vector_header(vec);
