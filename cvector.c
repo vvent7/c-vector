@@ -42,6 +42,11 @@ void* _vector_set_size(Vector(void) vec, size_t new_size){
       while(new_size > new_cap) new_cap *= _VEC_GROWTH_FACTOR;
       vh = ((VectorHeader*) _vector_set_capacity(vec, new_cap)) - 1;
     }
+    else{
+      size_t new_cap = vh->cap/2;
+      while(new_size < new_cap) new_cap /= _VEC_GROWTH_FACTOR;
+      vh = ((VectorHeader*) _vector_set_capacity(vec, new_cap*_VEC_GROWTH_FACTOR)) - 1;
+    }
     vh->sz = new_size;
   }
 
@@ -59,39 +64,54 @@ void* _vector_set_capacity(Vector(void) vec, size_t new_cap){
     (*vec) = (void*) (vh+1);
   }
 
-  return (void*) (vh+1);
+  return (*vec);
 }
 
-void* _vector_set_gap(Vector(void) vec, size_t index, size_t length){
+void* _vector_set_gap(Vector(void) vec, size_t index, size_t len){
   VectorHeader *vh = _vector_header(vec);
 
   if(vh==NULL || index>vh->sz) return NULL;
 
-  vh = ((VectorHeader*) _vector_set_size(vec, vh->sz+length)) - 1;
-  byte *a = (byte*) (*vec);
+  size_t sz_left = index * vh->tp_sz, sz_right = (vh->sz - index) * vh->tp_sz,
+    sz_block = len * vh->tp_sz;
 
-  memmove(a + (index+length) * vh->tp_sz,
-    a + index * vh->tp_sz,
-    (vh->sz - length - index) * vh->tp_sz);
+  _vector_set_size(vec, vh->sz+len);
 
-  return (void*) (a + index*vh->tp_sz);
+  byte *begin = (byte *) (*vec) + sz_left, *end = begin + sz_block;
+
+  memmove(end, begin, sz_right);
+
+  return (void*) begin;
 }
 
-void* _vector_insert_arr(Vector(void) vec, size_t index, void *arr, int qt){
+void* _vector_insert_arr(Vector(void) vec, size_t index, void *arr, int len){
   VectorHeader *vh = _vector_header(vec);
 
   if(vh==NULL || index>vh->sz) return NULL;
 
-  size_t block_size = qt * vh->tp_sz;
-  void *temp = malloc(block_size); memcpy(temp, arr, block_size);
-
-  _vector_set_gap(vec, index, qt); vh = _vector_header(vec);
-
-  void *dest = (byte*) (*vec) + index * vh->tp_sz;
-  memcpy(dest, temp, block_size);
+  size_t sz_block = len * vh->tp_sz;
+  void *temp = malloc(sz_block); memcpy(temp, arr, sz_block);
+  void *dest = _vector_set_gap(vec, index, len); memcpy(dest, temp, sz_block);
   free(temp);
 
   return dest;
+}
+
+void* _vector_erase_range(Vector(void) vec, size_t index, size_t len){
+  VectorHeader *vh = _vector_header(vec);
+
+  if(vh==NULL || index>=vh->sz) return NULL;
+
+  len = MIN(len, vh->sz-index);
+
+  Vector(byte) bv = (Vector(byte)) vec;
+  size_t sz_left = index * vh->tp_sz, sz_right = (vh->sz - index - len) * vh->tp_sz,
+    sz_block = len * vh->tp_sz;
+  byte *begin = (*bv) + sz_left, *end = begin + sz_block;
+
+  memmove(begin, end, sz_right); _vector_set_size(vec, vh->sz-len);
+
+  return (void*) ((*bv) + sz_left);
 }
 
 void _vector_free(Vector(void) vec){
