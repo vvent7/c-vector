@@ -3,7 +3,10 @@
 #include "cvector.h"
 
 size_t _vec_st;
-VectorHeader *_vec_hd;
+
+VectorHeader* _vector_header(Vector(void) vec){
+  return vector_is_valid(vec) ? ((VectorHeader*)(*vec))-1 : NULL;
+}
 
 Vector(void) _vector_create(size_t tp_sz){
   VectorHeader *vh = (VectorHeader*) malloc(sizeof(VectorHeader));
@@ -16,24 +19,20 @@ Vector(void) _vector_create(size_t tp_sz){
   return vec;
 }
 
-VectorHeader* _vector_header(Vector(void) vec){
-  return vector_is_valid(vec) ? ((VectorHeader*)(*vec))-1 : NULL;
-}
-
 size_t _vector_size(Vector(void) vec){
-  VectorHeader *vh = vector_header(vec);
+  VectorHeader *vh = _vector_header(vec);
   if(vh==NULL) return (size_t)0;
   return vh->sz;
 }
 
 size_t _vector_capacity(Vector(void) vec){
-  VectorHeader *vh = vector_header(vec);
+  VectorHeader *vh = _vector_header(vec);
   if(vh==NULL) return (size_t)0;
   return vh->cap;
 }
 
 void* _vector_set_size(Vector(void) vec, size_t new_size){
-  VectorHeader *vh = vector_header(vec);
+  VectorHeader *vh = _vector_header(vec);
 
   if(vh==NULL) return NULL;
   
@@ -41,7 +40,7 @@ void* _vector_set_size(Vector(void) vec, size_t new_size){
     if(new_size > vh->cap){
       size_t new_cap = MAX(vh->cap, 1);
       while(new_size > new_cap) new_cap *= _VEC_GROWTH_FACTOR;
-      vh = ((VectorHeader*) vector_set_capacity(vec, new_cap)) - 1;
+      vh = ((VectorHeader*) _vector_set_capacity(vec, new_cap)) - 1;
     }
     vh->sz = new_size;
   }
@@ -50,7 +49,7 @@ void* _vector_set_size(Vector(void) vec, size_t new_size){
 }
 
 void* _vector_set_capacity(Vector(void) vec, size_t new_cap){
-  VectorHeader *vh = vector_header(vec);
+  VectorHeader *vh = _vector_header(vec);
 
   if(vh==NULL) return NULL;
 
@@ -63,23 +62,38 @@ void* _vector_set_capacity(Vector(void) vec, size_t new_cap){
   return (void*) (vh+1);
 }
 
-void _vector_free(Vector(void) vec){
-  free(vector_header(vec)); free(vec);
+void* _vector_set_gap(Vector(void) vec, size_t index, size_t length){
+  VectorHeader *vh = _vector_header(vec);
+
+  if(vh==NULL || index>vh->sz) return NULL;
+
+  vh = ((VectorHeader*) _vector_set_size(vec, vh->sz+length)) - 1;
+  byte *a = (byte*) (*vec);
+
+  memmove(a + (index+length) * vh->tp_sz,
+    a + index * vh->tp_sz,
+    (vh->sz - length - index) * vh->tp_sz);
+
+  return (void*) (a + index*vh->tp_sz);
 }
 
-void* _vector_set_gap(Vector(void) vec, size_t index, size_t length){
-  VectorHeader *vh = vector_header(vec);
+void* _vector_insert_arr(Vector(void) vec, size_t index, void *arr, int qt){
+  VectorHeader *vh = _vector_header(vec);
 
-  if(vh!=NULL && index<=vh->sz){
-    vh = ((VectorHeader*) vector_set_size(vec, vh->sz+length)) - 1;
-    byte *a = (byte*) (*vec);
+  if(vh==NULL || index>vh->sz) return NULL;
 
-    memmove(a + (index+length) * vh->tp_sz,
-      a + index * vh->tp_sz,
-      (vh->sz - length - index) * vh->tp_sz);
+  size_t block_size = qt * vh->tp_sz;
+  void *temp = malloc(block_size); memcpy(temp, arr, block_size);
 
-    return (void*) (a + index*vh->tp_sz);
-  }
+  _vector_set_gap(vec, index, qt); vh = _vector_header(vec);
 
-  return NULL;
+  void *dest = (byte*) (*vec) + index * vh->tp_sz;
+  memcpy(dest, temp, block_size);
+  free(temp);
+
+  return dest;
+}
+
+void _vector_free(Vector(void) vec){
+  free(_vector_header(vec)); free(vec);
 }

@@ -26,13 +26,22 @@ int main(){
   print_vector(vec); print_dimensions(vec);
   print_result(vector_push_back(vec, 2)); print_vector(vec); print_dimensions(vec);
   print_result(vector_push_back(vec, 4)); print_vector(vec); print_dimensions(vec);
-  print_result(vector_push_back(vec, 5)); print_vector(vec); print_dimensions(vec);
   print_result(vector_insert(vec, 0, 1)); print_vector(vec); print_dimensions(vec);
   print_result(vector_insert(vec, 2, 3)); print_vector(vec); print_dimensions(vec);
-  print_result(vector_push_back(vec, 6)); print_vector(vec); print_dimensions(vec);
-  print_result(vector_insert(vec, 6, 7)); print_vector(vec); print_dimensions(vec);
 
-  print_result(vector_insert(vec, -1, 0)); print_result(vector_insert(vec, 8, 8));
+  int arr[4] = {-3, -2, -1, 0};
+
+  printf("Inserting array [-2, -1, 0] at index 0:\n");
+  vector_insert_arr(vec, 0, arr + 1, 3); print_vector(vec); print_dimensions(vec);
+
+  printf("Copying 2 vector elements, starting from index 1, to the end:\n");
+  vector_insert_arr(vec, vector_size(vec), (*vec) + 1, 2); print_vector(vec); print_dimensions(vec);
+
+  printf("Insert error tests:\n");
+  print_result(vector_insert(vec, -1, 0)); print_result(vector_insert(vec, vector_size(vec)+1, 8));
+  printf("\n");
+
+  printf("Final vector:\n");
   print_vector(vec); print_dimensions(vec);
   
   return 0;
