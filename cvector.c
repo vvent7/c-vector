@@ -8,10 +8,11 @@ VectorHeader* _vector_header(Vector(void) vec){
   return vector_is_valid(vec) ? ((VectorHeader*)(*vec))-1 : NULL;
 }
 
-Vector(void) _vector_create(size_t tp_sz){
+Vector(void) _vector_create(size_t tp_sz, ushort auto_shrink){
   VectorHeader *vh = (VectorHeader*) malloc(sizeof(VectorHeader));
   vh->sz = vh->cap = 0;
   vh->tp_sz = tp_sz;
+  vh->auto_shrink = auto_shrink ? 1 : 0;
 
   Vector(void) vec = (Vector(void)) malloc(sizeof(void*));
   *vec = (void*) (vh+1);
@@ -41,13 +42,11 @@ void* _vector_set_size(Vector(void) vec, size_t new_size){
       size_t new_cap = MAX(vh->cap, 1);
       while(new_size > new_cap) new_cap *= _VEC_GROWTH_FACTOR;
       vh = ((VectorHeader*) _vector_set_capacity(vec, new_cap)) - 1;
-    }
-    else{
-      size_t new_cap = vh->cap/2;
-      while(new_size < new_cap) new_cap /= _VEC_GROWTH_FACTOR;
-      vh = ((VectorHeader*) _vector_set_capacity(vec, new_cap*_VEC_GROWTH_FACTOR)) - 1;
+      vh->sz = new_size;
     }
     vh->sz = new_size;
+    if(new_size < vh->cap && vh->auto_shrink)
+      vh = ((VectorHeader*) _shrink_to_fit(vec)) - 1;
   }
 
   return (void*) (vh+1);
@@ -67,6 +66,16 @@ void* _vector_set_capacity(Vector(void) vec, size_t new_cap){
   return (*vec);
 }
 
+void* _shrink_to_fit(Vector(void) vec){
+  VectorHeader *vh = _vector_header(vec);
+
+  if(vh==NULL) return NULL;
+
+  size_t new_cap = vh->cap/2;
+  while(vh->sz < new_cap) new_cap /= _VEC_GROWTH_FACTOR;
+  return _vector_set_capacity(vec, new_cap*_VEC_GROWTH_FACTOR);
+}
+
 void* _vector_set_gap(Vector(void) vec, size_t index, size_t len){
   VectorHeader *vh = _vector_header(vec);
 
@@ -84,11 +93,10 @@ void* _vector_set_gap(Vector(void) vec, size_t index, size_t len){
   return (void*) begin;
 }
 
-void* _vector_insert_arr(Vector(void) vec, size_t index, void *arr, int len){
+void* _vector_insert_arr(Vector(void) vec, size_t index, void *arr, size_t len){
   VectorHeader *vh = _vector_header(vec);
 
   if(vh==NULL || index>vh->sz) return NULL;
-
   size_t sz_block = len * vh->tp_sz;
   void *temp = malloc(sz_block); memcpy(temp, arr, sz_block);
   void *dest = _vector_set_gap(vec, index, len); memcpy(dest, temp, sz_block);
