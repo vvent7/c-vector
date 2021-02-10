@@ -94,10 +94,10 @@ void* _vector_set_gap(Vector(void) vec, size_t index, size_t length);
  * Returns: Pointer to first element inserted in the vector*/
 void* _vector_insert_arr(Vector(void) vec, size_t index, void *arr, int len);
 #define vector_insert_arr(vec, index, arr, len)                                   \
-  (                                                                              \
+  (                                                                               \
     ((_vector_insert_arr((Vector(void)) vec, (_vec_st = index), arr, len))!=NULL) \
-      ? ((*vec) + _vec_st)                                                       \
-      : NULL                                                                     \
+      ? ((*vec) + _vec_st)                                                        \
+      : NULL                                                                      \
   )
 
 /* Removes a specific quantity of elements starting at a specific index from vector
