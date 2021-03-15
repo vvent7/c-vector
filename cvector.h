@@ -46,7 +46,7 @@ typedef struct{
 /* Verifies whether the Vector is valid */
 char _vector_valid(Vector(void) *vec);
 #define vector_valid(vec) (_vector_valid((Vector(void)*) vec))
-/*==============================================================================*/
+/*===============================================================================*/
 
 /*----------------------------------Constructor----------------------------------*/
 /* Creates the vector and returns its address 
