@@ -1,12 +1,14 @@
 #ifndef CVECTOR_H
 #define CVECTOR_H
 
-#ifndef _VEC_MIN
-  #define _VEC_MIN(x, y) (x<y ? x : y) /* Returns the minimum number (x or y). */
+#include <stdlib.h>
+
+#ifndef _CVEC_MIN
+  #define _CVEC_MIN(x, y) (x<y ? x : y) /* Returns the minimum number (x or y). */
 #endif
 
-#ifndef _VEC_MAX
-  #define _VEC_MAX(x, y) (x>y ? x : y) /* Returns the maximum number (x or y). */
+#ifndef _CVEC_MAX
+  #define _CVEC_MAX(x, y) (x>y ? x : y) /* Returns the maximum number (x or y). */
 #endif
 
 /* Rules:
@@ -142,8 +144,8 @@ void* _vector_set_gap(Vector(void) *vec, size_t index, size_t length);
  *   2) No checks are performed to verify that the type size of inserted item matches with
  *      the Vector type size. All copy/inserting are done with the 'tp_sz' of the Vector.
  *      Sending values with different type sizes will result in undefined behavior.
- *   3) Return: success -> Pointer to first element inserted in the vector
- *              failure -> NULL */
+ *   3) Return: Success -> Pointer to first element inserted in the vector
+ *              Failure -> NULL */
 
 /* Inserts 'length' elements of 'arr' inside 'vec' at a specific index */
 void* _vector_insert_n(Vector(void) *vec, size_t index, void *arr, size_t length);
@@ -172,10 +174,10 @@ void* _vector_insert_all(Vector(void) *vec1, size_t index, Vector(void) *vec2);
  *   1) all erase requests with 'index' out of bounds will fail
  *   2) all erase requests with 'index' in bounds, but 'length' out of
  *      bounds will be executed just with the inbounds 'indexes'.
- *   3) Return: success -> A pointer to the new location of the element that followed
+ *   3) Return: Success -> A pointer to the new location of the element that followed
  *              the last  element erased by the function call. This is the vector end if
  *              the operation erased the last element in the sequence.
- *              failure -> NULL */
+ *              Failure -> NULL */
 
 /* Removes a specific quantity of elements starting at a specific index from vector */
 void* _vector_erase_n(Vector(void) *vec, size_t index, size_t length);

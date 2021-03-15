@@ -84,7 +84,7 @@ void __vector_set_size(Vector(void) *vec, size_t new_size){
       size_t new_cap;
       
       if(vd->capMan==CVEC_CAPMAN_LOG){
-        new_cap = _VEC_MAX(vd->cap, 1);
+        new_cap = _CVEC_MAX(vd->cap, 1);
         while(new_size > new_cap) new_cap *= _CVEC_GROWTH_FACTOR;
       }
       else new_cap = new_size;
@@ -111,7 +111,7 @@ void _vector_set_capacity(Vector(void) *vec, size_t new_cap){
   if(vd && new_cap!=vd->cap){
     vd = realloc(vd, sizeof(VectorData) + vd->tp_sz * new_cap);
     (*vec) = (void*) (vd+1);
-    vd->cap = new_cap; vd->sz = _VEC_MIN(vd->cap, vd->sz);
+    vd->cap = new_cap; vd->sz = _CVEC_MIN(vd->cap, vd->sz);
   }
 }
 
@@ -192,7 +192,7 @@ void* _vector_erase_n(Vector(void) *vec, size_t index, size_t length){
   if(vd && index<vd->sz){
     Vector(_cvector_byte) *bv = (Vector(_cvector_byte)*) vec;
     size_t sz_left = index * vd->tp_sz,
-      sz_block = (length = _VEC_MIN(length, vd->sz-index)) * vd->tp_sz,
+      sz_block = (length = _CVEC_MIN(length, vd->sz-index)) * vd->tp_sz,
       sz_right = (vd->sz - index - length) * vd->tp_sz;
     _cvector_byte *begin = (*bv) + sz_left, *end = begin + sz_block;
 
