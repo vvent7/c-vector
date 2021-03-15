@@ -1,79 +1,62 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "cvector.h"
+#define MAXIMUM 10
+#define LIM 101
 
-void print_return(char *op, int *a){
-  if(a==NULL) printf("Not %s return\n", op);
-  else printf("%s return: %d\n", op, (*a));
-}
 
-void print_dimensions(Vector(int) vec){
-  VectorHeader *vh = vector_header(vec);
-  printf("Size: %lu, Capacity: %lu\n\n", vh->sz, vh->cap);
-}
-
-void print_vector(Vector(int) vec){
-  if(vector_empty(vec)) printf("Empty vector");
-  int *a; 
-  for(a=vector_begin(vec);a!=vector_end(vec);a++)
-    printf("%d ", *a);
-  printf("\n");
-}
-
-void print_specs(Vector(int) vec){
-  print_vector(vec); print_dimensions(vec);
+void printIntVector(Vector(int) *vec){
+  if(vector_valid(vec)){
+    size_t i;
+    printf("\nVector: {");
+    for(i=0;i<vector_size(vec);i++){
+      if(i!=0) printf(" ");
+      printf("%d", (*vec)[i]);
+    }
+    printf("} // Size: %lu, Capacity: %lu\n", vector_size(vec), vector_capacity(vec));
+  }
 }
 
 int main(){
-  Vector(int) vec = vector_create(int);
-  size_t i=0;
+  Vector(int) *vec = vector_new(int);
+  int a[MAXIMUM];
+  size_t i;
+  srand(time(NULL));
 
-  printf("Inserting elements:\n");
-  print_return("Insert", vector_push_back(vec, 2)); print_return("Insert", vector_push_back(vec, 4));
-  print_return("Insert", vector_insert(vec, 0, 1)); print_return("Insert", vector_insert(vec, 2, 3));
+  printf("Aux array:");
+  for(i=0;i<MAXIMUM;i++)
+    printf(" %d", a[i] = rand()%LIM);
+  printf("\n");
 
-  printf("\nFirst element: %d. Last element: %d. Entire Vector:\n", vector_front(vec), vector_back(vec));
-  for(i=0;i<vector_size(vec);i++) printf("%d ", (*vec)[i]);
-  printf("\n"); print_dimensions(vec);
+  printf("\nVector(int) default initial attributes:\n"
+    "Size: %lu\n"
+    "Capacity: %lu\n"
+    "Type size (tp_sz): %lu\n"
+    "Capacity Management: %d\n"
+    "Auto shrink: %d\n",
+    vector_size(vec), vector_capacity(vec), vector_tp_sz(vec),
+    vector_cap_man(vec),
+    vector_auto_shrink(vec));
 
-  printf("Inserting vector inside itself at index 0:\n");
-  vector_insert_vec(vec, 0, vec, vector_size(vec)); print_specs(vec);
+  vector_append_n(vec, a, MAXIMUM); printIntVector(vec);
 
-  printf("Clearing vector:\n"); vector_clear(vec); print_specs(vec);
+  vector_erase_n(vec, 0, vector_size(vec)/2); printIntVector(vec);
 
-  int arr[5] = {-1, 0, 1, 2, 3};
+  vector_set_auto_shrink(vec, 1); printIntVector(vec);
 
-  printf("Inserting array [0, 1, 2, 3] at index 0:\n");
-  print_return("Insert array (first el)", vector_insert_arr(vec, 0, arr + 1, 4));
-  print_specs(vec);
+  vector_set_cap_man(vec, CVEC_CAPMAN_EQ_SZ); printIntVector(vec);
 
-  printf("Copying 2 vector elements, starting from index 1, to the penultimate position:\n");
-  vector_insert_arr(vec, vector_size(vec)-1, (*vec) + 1, 2); print_specs(vec);
+  vector_set_cap_man(vec, CVEC_CAPMAN_LOG);
+  vector_insert_one(vec, 0, &(a[MAXIMUM-1])); printIntVector(vec);
 
-  printf("Inserting array [-1] to the end of the vector:\n");
-  if(vector_insert_arr(vec, vector_size(vec), arr, 1)==NULL) printf("OPA\n");
-  print_specs(vec);
-
-  printf("Error tests:\n");
-  if(vector_insert(vec, -1, 0)==NULL && vector_insert(vec, vector_size(vec)+1, 8)==NULL &&
-    vector_insert_arr(vec, -1, arr, 1)==NULL && vector_insert_arr(vec, vector_size(vec)+1, arr, 1)==NULL)
-    printf("Insert errors were well handled.\n");
-  if(vector_at(vec, -1)==0 && vector_at(vec, vector_size(vec))==0)
-    printf("Bad access errors were well handled\n\n");
-
-  printf("Erasing last element:\n");
-  vector_erase(vec, vector_size(vec)-1); print_specs(vec);
-
-  printf("Erasing 2 elements starting at index 1:\n");
-  vector_erase_range(vec, 1, 2); print_specs(vec);
+  vector_erase(vec, vector_size(vec)-1); printIntVector(vec);
   
-  printf("Erasing 2 element starting at index 1:\n");
-  vector_erase_range(vec, 1, 2); print_specs(vec);
+  vector_erase_n(vec, 0, vector_size(vec)-2); printIntVector(vec);
 
-  printf("Erasing all elements:\n");
-  vector_erase_range(vec, 0, vector_size(vec)); print_specs(vec);
-  
+  vector_clear(vec); printIntVector(vec);
+
   vector_free(vec);
-  printf("Vector freed.\n");
 
   return 0;
 }
