@@ -12,8 +12,7 @@
 /* Rules:
  *   _CVEC_GROWTH_FACTOR > 1
  *   _CVEC_DEF_CAP_MAN must be a value of VectorCapMan enum
- *   0 <= _CVEC_DEF_AUTO_SK <= 1
-*/
+ *   0 <= _CVEC_DEF_AUTO_SK <= 1 */
 #define _CVEC_GROWTH_FACTOR 2
 #define _CVEC_DEF_CAP_MAN CVEC_CAPMAN_LOG
 #define _CVEC_DEF_AUTO_SK 0
