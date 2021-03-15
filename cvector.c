@@ -165,8 +165,6 @@ void* _vector_set_gap(Vector(void) *vec, size_t index, size_t length){
 void* _vector_insert_n(Vector(void) *vec, size_t index, void *arr, size_t length){
   VectorData *vd = __vector_data(vec);
 
-  if(vd==NULL || index>vd->sz) return NULL;
-
   if(vd && index<=vd->sz){
     size_t sz_block = length * vd->tp_sz;
     void *temp = (void*) malloc(sz_block), *dest;
